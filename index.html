@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Compressor - Client Side</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Configure PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-indigo-100 min-h-screen py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="../index.html" class="mb-4 inline-flex items-center text-purple-600 hover:text-purple-700 font-medium bg-white px-4 py-2 rounded-lg shadow">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back
+            </a>
+            <div class="text-center">
+                <p class="text-4xl md:text-5xl font-bold mb-2" style="background: linear-gradient(to right, #ca8a04, #eab308); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">ET EDUTECH</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Compress PDF</h1>
+                <div class="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-300 px-4 py-2 rounded-lg">
+                    <svg class="w-5 h-5 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <span class="text-yellow-800">Processing large files may be resource‑intensive; use with caution.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Container -->
+        <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+            <!-- Upload Section -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">📄 Select File</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-500 transition cursor-pointer" id="dropZone">
+                    <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                    <label for="pdfFile" class="cursor-pointer">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="text-gray-600 mb-2">Click to select or drag & drop file here</p>
+                        <p class="text-sm text-gray-500">Maximum file size: 50MB</p>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Loading Section (while uploading/processing file) -->
+            <div id="loadingSection" class="hidden mb-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center justify-center mb-3">
+                        <svg class="animate-spin h-8 w-8 text-purple-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-lg font-medium text-gray-800" id="loadingText">Loading file...</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="loadingBar" class="bg-purple-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Info Section -->
+            <div id="fileInfo" class="hidden mb-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-800 mb-3">Original File</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Filename:</p>
+                            <p class="font-medium text-gray-800" id="originalName">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">File Size:</p>
+                            <p class="font-medium text-gray-800" id="originalSize">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section (shows ABOVE compression options) -->
+            <div id="previewSection" class="hidden mb-6">
+                <div class="bg-white border border-gray-300 rounded-lg p-4">
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-gray-800">Preview at Selected Quality</h4>
+                    </div>
+                    <div class="border border-gray-300 rounded-lg overflow-auto bg-gray-100" style="height: 600px;" id="pdfViewerContainer">
+                        <canvas id="pdfCanvas" class="mx-auto"></canvas>
+                    </div>
+                    <div class="mt-3 flex flex-col items-center gap-3">
+                        <!-- Page Navigation - Always on top, centered -->
+                        <div class="flex items-center gap-3">
+                            <button id="prevPageBtn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                ← Prev
+                            </button>
+                            <span class="text-sm text-gray-600">
+                                Page <span id="currentPage">1</span> / <span id="totalPages">1</span>
+                            </span>
+                            <button id="nextPageBtn" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Next →
+                            </button>
+                        </div>
+                        <!-- Preview File Size - Below pagination, centered -->
+                        <div class="inline-flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg border border-purple-200">
+                            <span class="text-sm text-gray-600">Preview File Size:</span>
+                            <span class="font-bold text-purple-600" id="previewFileSize">-</span>
+                            <span class="text-sm text-gray-500" id="previewSizeDiff"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compression Options -->
+            <div id="compressionOptions" class="hidden mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">Resolution Quality</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="low">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">Low</h4>
+                            <div class="quality-status">
+                                <div class="quality-loading w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                <input type="radio" name="quality" value="low" class="w-4 h-4 hidden quality-radio">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">100 DPI</p>
+                        <p class="text-xs text-gray-500 mt-1 quality-hint">Smallest file</p>
+                    </div>
+                    <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="medium">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">Medium</h4>
+                            <div class="quality-status">
+                                <div class="quality-loading w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                <input type="radio" name="quality" value="medium" class="w-4 h-4 hidden quality-radio">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">150 DPI</p>
+                        <p class="text-xs text-gray-500 mt-1 quality-hint">Recommended</p>
+                    </div>
+                    <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="good">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">Good</h4>
+                            <div class="quality-status">
+                                <div class="quality-loading w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                <input type="radio" name="quality" value="good" class="w-4 h-4 hidden quality-radio">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">200 DPI</p>
+                        <p class="text-xs text-gray-500 mt-1 quality-hint">Balanced</p>
+                    </div>
+                    <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="high">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">High</h4>
+                            <div class="quality-status">
+                                <div class="quality-loading w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                <input type="radio" name="quality" value="high" class="w-4 h-4 hidden quality-radio">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">250 DPI</p>
+                        <p class="text-xs text-gray-500 mt-1 quality-hint">Better quality</p>
+                    </div>
+                    <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="best">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">Best</h4>
+                            <div class="quality-status">
+                                <div class="quality-loading w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                <input type="radio" name="quality" value="best" class="w-4 h-4 hidden quality-radio">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">300 DPI</p>
+                        <p class="text-xs text-gray-500 mt-1 quality-hint">Print quality</p>
+                    </div>
+                    <div class="border-2 border-purple-500 bg-purple-50 rounded-lg p-4 cursor-pointer quality-option hover:border-purple-600" data-quality="original">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">Original</h4>
+                            <div class="quality-status">
+                                <input type="radio" name="quality" value="original" checked class="w-4 h-4 quality-radio">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">No compression</p>
+                        <p class="text-xs text-gray-500 mt-1 quality-hint">Keep as-is</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compress Button (now means "Save Compressed PDF") -->
+            <button id="compressBtn" class="hidden w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition font-medium text-lg mb-6">
+                💾 Save Compressed PDF
+            </button>
+
+            <!-- Progress Section -->
+            <div id="progressSection" class="hidden mb-6">
+                <div class="bg-gray-100 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700" id="progressText">Initializing...</span>
+                        <span class="text-sm font-medium text-gray-700" id="progressPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="progressBar" class="bg-purple-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <div id="progressDetails" class="mt-4 space-y-2 text-sm text-gray-600">
+                        <!-- Progress details will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div id="resultSection" class="hidden">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                    <div class="flex items-center justify-center mb-4">
+                        <svg class="w-16 h-16 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-center font-semibold text-gray-800 mb-4 text-xl">Compression Complete!</h3>
+
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-1">Original Size</p>
+                            <p class="font-bold text-gray-800" id="resultOriginalSize">-</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-1">Compressed Size</p>
+                            <p class="font-bold text-green-600" id="resultCompressedSize">-</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-1">Space Saved</p>
+                            <p class="font-bold text-purple-600" id="resultSavedPercent">-</p>
+                        </div>
+                    </div>
+
+                    <button id="downloadBtn" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-medium text-lg mb-3">
+                        ⬇️ Download Compressed PDF
+                    </button>
+                    <button id="resetBtn" class="w-full bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition font-medium">
+                        🔄 Compress Another File
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms & Conditions / Disclaimer -->
+        <div class="mt-6 text-xs md:text-sm text-gray-600">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h3 class="font-semibold text-amber-800 mb-1">Terms & Conditions</h3>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><span class="font-medium">Scope:</span> This tool is a standalone, client‑side utility. All processing occurs locally within your web browser; no server‑side upload or processing is performed.</li>
+                    <li><span class="font-medium">Data handling:</span> Files remain on your device. We do not transmit, store, or collect your files or their contents.</li>
+                    <li><span class="font-medium">Responsibility:</span> You are solely responsible for how you use this tool and for maintaining backups of your data. Always verify outputs before relying on them.</li>
+                    <li><span class="font-medium">Disclaimer of warranties:</span> The software is provided “as is” and “as available,” without warranties of any kind, whether express or implied, including merchantability, fitness for a particular purpose, and non‑infringement.</li>
+                    <li><span class="font-medium">Limitation of liability:</span> To the maximum extent permitted by law, we are not liable for any loss, damage, or data corruption arising from or related to your use of this tool.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- License & Source (AGPL Compliance) -->
+        <div class="mt-6 text-center text-sm text-gray-500">
+            <p class="mb-1">
+                This tool is distributed under <span class="font-medium">AGPLv3</span>.
+                It uses <a href="https://www.ghostscript.com/" target="_blank" class="text-purple-600 hover:underline">Ghostscript</a> (<span class="font-medium">AGPLv3</span>).
+            </p>
+            <p class="mb-1">
+                Source code: 
+                <a href="https://github.com/etsolution/gs-gpl-utils" target="_blank" rel="noopener" class="text-purple-600 hover:underline font-medium">github.com/etsolution/gs-gpl-utils</a>
+            </p>
+            <p class="mb-1">
+                Licenses: 
+                <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener" class="text-purple-600 hover:underline">AGPLv3</a> · 
+                <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener" class="text-purple-600 hover:underline">GPLv3</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="pdfapi.js?v=2"></script>
+    <script>
+        // Register Service Worker for caching WASM files
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
