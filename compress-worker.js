@@ -108,9 +108,9 @@ class PDFCompressionWorker {
         const qualityMap = {
             'low': 100,
             'medium': 150,
+            'fair': 180,
             'good': 200,
             'high': 250,
-            'best': 300,
             'original': 'original'
         };
         

@@ -603,7 +603,7 @@ class PDFCompressor {
             return;
         }
         
-        const qualities = ['low', 'medium', 'good', 'high', 'best'];
+        const qualities = ['low', 'medium', 'fair', 'good', 'high'];
         const currentFile = this.file; // Track which file we're preloading for
         
         // Check if all qualities are already cached
