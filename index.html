@@ -142,6 +142,17 @@
                         <p class="text-sm text-gray-600">150 DPI</p>
                         <p class="text-xs text-gray-500 mt-1 quality-hint">Recommended</p>
                     </div>
+                    <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="fair">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">Fair</h4>
+                            <div class="quality-status">
+                                <div class="quality-loading w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                <input type="radio" name="quality" value="fair" class="w-4 h-4 hidden quality-radio">
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">180 DPI</p>
+                        <p class="text-xs text-gray-500 mt-1 quality-hint">Balanced</p>
+                    </div>
                     <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="good">
                         <div class="flex items-center justify-between mb-2">
                             <h4 class="font-semibold text-gray-800">Good</h4>
@@ -151,7 +162,7 @@
                             </div>
                         </div>
                         <p class="text-sm text-gray-600">200 DPI</p>
-                        <p class="text-xs text-gray-500 mt-1 quality-hint">Balanced</p>
+                        <p class="text-xs text-gray-500 mt-1 quality-hint">Better quality</p>
                     </div>
                     <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="high">
                         <div class="flex items-center justify-between mb-2">
@@ -162,17 +173,6 @@
                             </div>
                         </div>
                         <p class="text-sm text-gray-600">250 DPI</p>
-                        <p class="text-xs text-gray-500 mt-1 quality-hint">Better quality</p>
-                    </div>
-                    <div class="border-2 border-gray-300 rounded-lg p-4 transition quality-option quality-locked opacity-60 cursor-not-allowed" data-quality="best">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-semibold text-gray-800">Best</h4>
-                            <div class="quality-status">
-                                <div class="quality-loading w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                                <input type="radio" name="quality" value="best" class="w-4 h-4 hidden quality-radio">
-                            </div>
-                        </div>
-                        <p class="text-sm text-gray-600">300 DPI</p>
                         <p class="text-xs text-gray-500 mt-1 quality-hint">Print quality</p>
                     </div>
                     <div class="border-2 border-purple-500 bg-purple-50 rounded-lg p-4 cursor-pointer quality-option hover:border-purple-600" data-quality="original">
