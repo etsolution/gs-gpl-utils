@@ -532,10 +532,10 @@ class PDFCompressor {
             alert('Please select a PDF file');
             return false;
         }
-        if (file.size > 50 * 1024 * 1024) {
-            alert('File size exceeds 50MB limit');
-            return false;
-        }
+        // if (file.size > 50 * 1024 * 1024) {
+        //     alert('File size exceeds 50MB limit');
+        //     return false;
+        // }
         return true;
     }
 
